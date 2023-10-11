@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mapper.PostMapper">
+<!--    插入帖子-->
+    <insert id="insertPost" parameterType="post">
+        insert into post (id,create_id,create_date,title,content) values (#{id},#{createId},#{createDate},#{title},#{content})
+    </insert>
+
+<!--    个人中心，按时间排序-->
+    <select id="timeSort" parameterType="int" resultType="post">
+        select p.*,u.nick_name,u.head_url,u.signature from post p left join user u on u.id=p.create_id where create_id = #{id} order by create_date desc
+    </select>
+
+<!--    个人中心，按热度排序-->
+    <select id="hotSort" parameterType="int" resultType="post">
+        select p.*,u.nick_name,u.head_url,u.signature from post p left join user u on u.id=p.create_id where create_id = #{id} order by (view + good + discuss + collect) desc
+    </select>
+
+<!--    查找全部帖子-->
+    <select id="findAll" resultType="post">
+        select p.*,u.nick_name,u.head_url,u.signature from post p left join user u on u.id=p.create_id order by create_date desc
+    </select>
+
+<!--    热榜top10-->
+    <select id="top10" resultType="post">
+        select p.*,u.nick_name,u.head_url,u.signature from post p left join user u on u.id=p.create_id order by (view + good + discuss + collect) desc limit 0,10;
+    </select>
+
+<!--    点赞-->
+    <update id="addGood" parameterType="int">
+        update post set good = good + 1 where id = #{id}
+    </update>
+
+<!--    取消点赞-->
+    <update id="delGood" parameterType="int">
+        update post set good = good - 1 where id = #{id}
+    </update>
+
+<!--    收藏-->
+    <update id="addCollect" parameterType="int">
+        update post set collect = collect + 1 where id = #{id}
+    </update>
+
+<!--    取消收藏-->
+    <update id="delCollect" parameterType="int">
+        update post set collect = collect - 1 where id = #{id}
+    </update>
+
+<!--    获取收藏列表-->
+    <select id="getCollect" parameterType="java.util.Arrays" resultType="post">
+        select p.*,u.nick_name,u.head_url,u.signature from post p left join user u on u.id=p.create_id where p.id in
+        <foreach collection="array" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        order by field(
+            p.id,
+            <foreach collection="array" separator="," item="id">
+                #{id}
+            </foreach>
+        )
+    </select>
+
+<!--    浏览数增加-->
+    <update id="addView" parameterType="int">
+        update post set view = view + 1 where id = #{id}
+    </update>
+
+<!--    查找帖子流量信息-->
+    <select id="findInfo" parameterType="int" resultType="postinfovo">
+        select view,good,discuss,collect from post where id = #{id}
+    </select>
+
+<!--    评论数量加1-->
+    <update id="addDiscuss" parameterType="int">
+        update post set discuss = discuss + 1 where id = #{id}
+    </update>
+</mapper>

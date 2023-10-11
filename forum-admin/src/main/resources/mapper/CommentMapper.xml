@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mapper.CommentMapper">
+<!--     插入评论-->
+    <insert id="insert" parameterType="comment">
+        insert into comment (create_date,uid,post_id,reply_id,top_id,content) values (#{createDate},#{uid},#{postId},#{replyId},#{topId},#{content})
+    </insert>
+
+<!--    获取一级评论，热度-->
+    <select id="hotSort" parameterType="int" resultType="commentvo">
+        select c.*,u.nick_name,u.head_url,u.signature from comment c,user u where c.uid = u.id and top_id = -1 and post_id = #{id} order by c.good desc;
+    </select>
+
+<!--    获取一级评论，时间-->
+    <select id="timeSort" parameterType="int" resultType="commentvo">
+        select c.*,u.nick_name,u.head_url,u.signature from comment c,user u where c.uid = u.id and top_id = -1 and post_id = #{id} order by c.create_date desc;
+    </select>
+
+<!--    评论点赞-->
+    <update id="doGood" parameterType="int">
+        update comment set good = good + #{step} where cid = #{id}
+    </update>
+
+<!--    查找子评论数量-->
+    <select id="getSub" parameterType="int" resultType="int">
+        select count(*) from comment where post_id = #{pid} and top_id = #{tid}
+    </select>
+
+<!--    查找子评论-->
+    <select id="findSub" parameterType="int" resultType="replyvo">
+        select c.cid,c.uid,c.top_id,c.create_date,c.content,c.good,u.head_url,u.nick_name,u.signature,ru.id rid,ru.head_url rHead,ru.signature rsignature,ru.nick_name rName
+        from comment c,user u, user ru
+        where u.id = c.uid and ru.id = c.reply_id and c.post_id = #{pid} and c.top_id = #{tid} order by c.good desc;
+    </select>
+</mapper>
