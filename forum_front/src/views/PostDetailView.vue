@@ -52,8 +52,8 @@
                         <div class="linedate">{{ sub.createDate }}</div>
                         <!-- 评论内容 -->
                         <div class="linecontent" style="height:30px">
-                            <span style="margin-right:10px;font-size:13px;color:gray" v-if="sub.rname != sub.nickName && sub.rname != item.nickName">回复</span>
-                            <div class="linehead" style="height:30px;line-height:30px;margin:0;" v-if="sub.rname != sub.nickName && sub.rname != item.nickName">
+                            <span style="margin-right:10px;font-size:13px;color:gray" v-if="sub.rname != sub.nickName">回复</span>
+                            <div class="linehead" style="height:30px;line-height:30px;margin:0;" v-if="sub.rname != sub.nickName">
                                 <img :src="require('@/assets/img/' + sub.rhead + '.jpg')" @click.stop="turnToPersonSub(sub)" style="width:30px;height:30px;margin-right:10px">
                                 <span @click.stop="turnToPersonSub(sub)" style="height:30px;">{{ sub.rname }}</span>:
                             </div>
@@ -297,13 +297,14 @@ export default {
                     }).then( response => {
                         this.top.replyList = response.data.data;
                     })
-                }else {
-                    if (this.pick1) {
-                        this.hotSort(this.post.id);
-                    }else {
-                        this.timeSort(this.post.id);
-                    }
                 }
+
+                if (this.pick1) {
+                    this.hotSort(this.post.id);
+                }else {
+                    this.timeSort(this.post.id);
+                }
+                this.showSub(this.current)
                 this.post.discuss++;
                 this.content1 = null;
                 this.success(response.data.msg);
@@ -425,8 +426,11 @@ export default {
 
     //展示子评论
     showSub(item) {
+        console.log("进入sub");
         item.isOpen = !item.isOpen;
+        console.log(item.isOpen);
         if (item.isOpen) {
+            console.log("发送sub请求");
             request({
                 method: "get",
                 url: "comment/findSub/" + item.postId + "/" + item.cid
